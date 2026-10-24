@@ -3,36 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unit Converter – Free Online Conversion Tool</title>
-<meta name="description" content="Free unit converter for pressure, length, temperature, weight, area, and speed. Instant conversions with clean interface.">
-<meta name="keywords" content="unit converter, pressure converter, temperature converter, length converter, weight converter">
-<meta property="og:title" content="Unit Converter">
-<meta property="og:description" content="Convert pressure, length, temperature, weight and more instantly.">
-<meta property="og:type" content="website">
+<title>Unit Converter</title>
+<meta name="description" content="Convert pressure, length, temperature, weight, area, and speed.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root { --primary: #0d9488; --bg: #f8fafc; --card: #ffffff; }
+:root { --bg: #000; --text: #fff; --muted: #86868b; --card: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.12); }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; }
-.header { background: linear-gradient(135deg, #0d9488, #0f766e); color: white; padding: 1.5rem; text-align: center; }
-.header h1 { font-size: 1.8rem; }
-.container { max-width: 720px; margin: -1rem auto 2rem; padding: 0 1rem; }
-.card { background: var(--card); border-radius: 16px; padding: 1.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(20px); background: rgba(0,0,0,0.65); border-bottom: 1px solid var(--border); padding: 1rem 2rem; }
+.nav a { color: var(--text); text-decoration: none; font-weight: 500; }
+.container { max-width: 640px; margin: 0 auto; padding: 7rem 1.5rem 4rem; }
+h1 { font-size: 2.8rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 2rem; text-align: center; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; }
 .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
-.tab { padding: 0.6rem 1rem; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
-.tab.active { background: var(--primary); color: white; }
-.form-group { margin-bottom: 1rem; }
-label { display: block; margin-bottom: 0.4rem; font-weight: 600; }
-input, select { width: 100%; padding: 0.85rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; }
-.swap { text-align: center; margin: 0.5rem 0; }
-.swap button { width: auto; padding: 0.5rem 1.5rem; background: #64748b; }
-.result { margin-top: 1.25rem; padding: 1.25rem; background: #f0fdfa; border-radius: 12px; font-size: 1.25rem; text-align: center; font-weight: 600; color: var(--primary); }
-.footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; }
-.footer a { color: var(--primary); text-decoration: none; }
+.tab { padding: 0.55rem 1.1rem; background: transparent; border: 1px solid var(--border); border-radius: 980px; color: var(--muted); cursor: pointer; font-size: 0.85rem; }
+.tab.active { background: #fff; color: #000; border-color: #fff; }
+label { display: block; margin-bottom: 0.4rem; font-weight: 500; font-size: 0.9rem; color: var(--muted); }
+input, select { width: 100%; padding: 0.9rem 1rem; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; color: #fff; font-size: 1rem; font-family: inherit; margin-bottom: 1rem; }
+.swap { text-align: center; margin: 0.5rem 0 1rem; }
+.swap button { width: auto; padding: 0.5rem 1.4rem; background: transparent; color: #fff; border: 1px solid var(--border); border-radius: 980px; cursor: pointer; }
+.result { margin-top: 1.5rem; padding: 1.5rem; background: rgba(255,255,255,0.04); border-radius: 14px; font-size: 1.3rem; text-align: center; font-weight: 500; }
 </style>
 </head>
 <body>
-<div class="header"><h1>Unit Converter</h1></div>
+<nav class="nav"><a href="index.html">← Tools</a></nav>
 <div class="container">
+  <h1>Unit Converter</h1>
   <div class="card">
     <div class="tabs">
       <button class="tab active" data-type="pressure">Pressure</button>
@@ -42,14 +38,13 @@ input, select { width: 100%; padding: 0.85rem; border: 1px solid #e2e8f0; border
       <button class="tab" data-type="area">Area</button>
       <button class="tab" data-type="speed">Speed</button>
     </div>
-    <div class="form-group"><label for="value">Value</label><input type="number" id="value" value="1" step="any"></div>
-    <div class="form-group"><label for="from">From</label><select id="from"></select></div>
-    <div class="swap"><button type="button" id="swapBtn">⇕ Swap</button></div>
-    <div class="form-group"><label for="to">To</label><select id="to"></select></div>
+    <label>Value</label><input type="number" id="value" value="1" step="any">
+    <label>From</label><select id="from"></select>
+    <div class="swap"><button type="button" id="swapBtn">Swap</button></div>
+    <label>To</label><select id="to"></select>
     <div class="result" id="result">Enter a value</div>
   </div>
 </div>
-<div class="footer"><a href="privacy.html">Privacy Policy</a> • Free utility • No data stored</div>
 <script>
 const units = {
   pressure: { psi:1, bar:0.0689476, kPa:6.89476, MPa:0.00689476, atm:0.068046, mmHg:51.7149 },
