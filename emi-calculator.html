@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EMI Calculator</title>
-<meta name="description" content="Calculate monthly loan EMI, total interest, and amortization schedule.">
+<meta name="description" content="Calculate monthly loan EMI, total interest, and full amortization schedule. Yearly or monthly view.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root { --bg: #000; --text: #fff; --muted: #86868b; --card: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.12); --accent: #2997ff; --btn-bg: #fff; --btn-text: #000; }
@@ -14,14 +14,13 @@ body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); c
 .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(20px); background: color-mix(in srgb, var(--bg) 70%, transparent); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
 .nav a { color: var(--text); text-decoration: none; font-weight: 500; }
 .toggle { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 980px; padding: 0.35rem 0.8rem; cursor: pointer; font-size: 0.8rem; }
-.container { max-width: 720px; margin: 0 auto; padding: 7rem 1.5rem 4rem; animation: fadeUp 0.6s ease both; }
+.container { max-width: 780px; margin: 0 auto; padding: 7rem 1.5rem 4rem; animation: fadeUp 0.6s ease both; }
 h1 { font-size: 2.8rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 2rem; text-align: center; }
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; transition: border-color 0.3s; }
-.card:hover { border-color: var(--accent); }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 1.2rem; }
 label { display: block; margin-bottom: 0.45rem; font-weight: 500; font-size: 0.9rem; color: var(--muted); }
-input { width: 100%; padding: 0.9rem 1rem; background: transparent; border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 1rem; font-family: inherit; transition: border-color 0.2s; }
-input:focus { outline: none; border-color: var(--accent); }
+input, select { width: 100%; padding: 0.9rem 1rem; background: transparent; border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 1rem; font-family: inherit; }
+input:focus, select:focus { outline: none; border-color: var(--accent); }
 button { width: 100%; padding: 1rem; background: var(--btn-bg); color: var(--btn-text); border: none; border-radius: 980px; font-size: 1rem; font-weight: 500; cursor: pointer; margin-top: 0.5rem; transition: transform 0.2s; }
 button:hover { transform: scale(1.02); }
 .results { margin-top: 2rem; animation: fadeUp 0.4s ease both; }
@@ -29,8 +28,11 @@ button:hover { transform: scale(1.02); }
 .result-box { background: var(--card); border-radius: 14px; padding: 1.2rem; text-align: center; border: 1px solid var(--border); }
 .result-box strong { display: block; font-size: 1.4rem; margin-bottom: 0.3rem; color: var(--accent); }
 .result-box span { color: var(--muted); font-size: 0.85rem; }
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
-th, td { padding: 0.7rem; text-align: right; border-bottom: 1px solid var(--border); }
+.view-toggle { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.view-toggle button { width: auto; padding: 0.5rem 1.2rem; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 980px; }
+.view-toggle button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.85rem; }
+th, td { padding: 0.6rem; text-align: right; border-bottom: 1px solid var(--border); }
 th { color: var(--muted); font-weight: 500; text-align: center; }
 th:first-child, td:first-child { text-align: left; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -44,24 +46,32 @@ th:first-child, td:first-child { text-align: left; }
   <div class="card">
     <form id="emiForm">
       <div class="form-row">
-        <div><label>Loan Amount</label><input type="number" id="principal" value="500000" min="1" required></div>
+        <div><label>Loan Amount (₹)</label><input type="number" id="principal" value="500000" min="1" required></div>
         <div><label>Annual Rate (%)</label><input type="number" id="rate" value="8.5" step="0.1" min="0" required></div>
       </div>
       <div class="form-row">
-        <div><label>Tenure (Years)</label><input type="number" id="tenure" value="20" min="1" required></div>
-        <div><label>Extra Monthly</label><input type="number" id="extra" value="0" min="0"></div>
+        <div><label>Tenure</label><input type="number" id="tenure" value="20" min="1" required></div>
+        <div><label>Tenure Unit</label><select id="tenureUnit"><option value="years">Years</option><option value="months">Months</option></select></div>
       </div>
-      <button type="submit">Calculate</button>
+      <div class="form-row">
+        <div><label>Extra Monthly (₹)</label><input type="number" id="extra" value="0" min="0"></div>
+        <div></div>
+      </div>
+      <button type="submit">Calculate EMI</button>
     </form>
     <div id="results" class="results" style="display:none;">
       <div class="result-grid">
         <div class="result-box"><strong id="emi"></strong><span>Monthly EMI</span></div>
+        <div class="result-box"><strong id="principalOut"></strong><span>Principal</span></div>
         <div class="result-box"><strong id="totalInterest"></strong><span>Total Interest</span></div>
-        <div class="result-box"><strong id="totalPayment"></strong><span>Total Payment</span></div>
+        <div class="result-box"><strong id="totalPayment"></strong><span>Total Amount</span></div>
         <div class="result-box"><strong id="payoff"></strong><span>Payoff Time</span></div>
       </div>
-      <h3 style="margin-bottom:0.8rem; font-weight:500;">Yearly Summary</h3>
-      <div style="overflow-x:auto;"><table id="schedule"><thead><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead><tbody></tbody></table></div>
+      <div class="view-toggle">
+        <button class="active" id="viewYearly">Yearly</button>
+        <button id="viewMonthly">Monthly</button>
+      </div>
+      <div style="overflow-x:auto;"><table id="schedule"><thead id="scheduleHead"></thead><tbody></tbody></table></div>
     </div>
   </div>
 </div>
@@ -75,48 +85,94 @@ function setTheme(theme) {
 }
 setTheme(localStorage.getItem('theme') || 'dark');
 toggle.addEventListener('click', () => setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'));
+
+let scheduleData = [];
+let viewMode = 'yearly';
+
+function formatINR(num) {
+  return '₹' + Math.round(num).toLocaleString('en-IN');
+}
+
 document.getElementById('emiForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const P = parseFloat(document.getElementById('principal').value);
   const annualRate = parseFloat(document.getElementById('rate').value);
-  const years = parseInt(document.getElementById('tenure').value);
+  const tenureVal = parseInt(document.getElementById('tenure').value);
+  const unit = document.getElementById('tenureUnit').value;
   const extra = parseFloat(document.getElementById('extra').value) || 0;
+  const months = unit === 'years' ? tenureVal * 12 : tenureVal;
   const r = annualRate / 12 / 100;
-  const n = years * 12;
-  const baseEmi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  const baseEmi = P * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
   const emi = baseEmi + extra;
-  let balance = P, totalInterest = 0, months = 0;
-  const maxMonths = n * 2;
-  while (balance > 0.01 && months < maxMonths) {
+
+  let balance = P, totalInterest = 0, m = 0;
+  scheduleData = [];
+  const maxMonths = months * 2;
+  while (balance > 0.01 && m < maxMonths) {
     const interest = balance * r;
     let principalPaid = emi - interest;
     if (principalPaid > balance) principalPaid = balance;
     balance -= principalPaid;
     totalInterest += interest;
-    months++;
+    m++;
+    scheduleData.push({ month: m, principal: principalPaid, interest, balance: Math.max(0, balance) });
   }
-  const payoffYears = Math.floor(months / 12);
-  const payoffMonths = months % 12;
-  document.getElementById('emi').textContent = emi.toFixed(0);
-  document.getElementById('totalInterest').textContent = totalInterest.toFixed(0);
-  document.getElementById('totalPayment').textContent = (P + totalInterest).toFixed(0);
+
+  const payoffYears = Math.floor(m / 12);
+  const payoffMonths = m % 12;
+  document.getElementById('emi').textContent = formatINR(emi);
+  document.getElementById('principalOut').textContent = formatINR(P);
+  document.getElementById('totalInterest').textContent = formatINR(totalInterest);
+  document.getElementById('totalPayment').textContent = formatINR(P + totalInterest);
   document.getElementById('payoff').textContent = payoffYears + 'y ' + payoffMonths + 'm';
+
+  renderSchedule();
+  document.getElementById('results').style.display = 'block';
+});
+
+function renderSchedule() {
+  const head = document.getElementById('scheduleHead');
   const tbody = document.querySelector('#schedule tbody');
   tbody.innerHTML = '';
-  balance = P;
-  for (let y = 1; y <= Math.ceil(months / 12); y++) {
-    let yearP = 0, yearI = 0;
-    for (let m = 1; m <= 12 && balance > 0; m++) {
-      const interest = balance * r;
-      let pp = emi - interest;
-      if (pp > balance) pp = balance;
-      yearI += interest; yearP += pp; balance -= pp;
+  if (viewMode === 'yearly') {
+    head.innerHTML = '<tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>';
+    let year = 1, yp = 0, yi = 0;
+    scheduleData.forEach((row, i) => {
+      yp += row.principal;
+      yi += row.interest;
+      if ((i + 1) % 12 === 0 || i === scheduleData.length - 1) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${year}</td><td>${formatINR(yp)}</td><td>${formatINR(yi)}</td><td>${formatINR(row.balance)}</td>`;
+        tbody.appendChild(tr);
+        year++; yp = 0; yi = 0;
+      }
+    });
+  } else {
+    head.innerHTML = '<tr><th>Month</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>';
+    scheduleData.slice(0, 120).forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${row.month}</td><td>${formatINR(row.principal)}</td><td>${formatINR(row.interest)}</td><td>${formatINR(row.balance)}</td>`;
+      tbody.appendChild(tr);
+    });
+    if (scheduleData.length > 120) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="4" style="text-align:center; color:var(--muted);">Showing first 120 months</td>';
+      tbody.appendChild(tr);
     }
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${y}</td><td>${yearP.toFixed(0)}</td><td>${yearI.toFixed(0)}</td><td>${Math.max(0,balance).toFixed(0)}</td>`;
-    tbody.appendChild(row);
   }
-  document.getElementById('results').style.display = 'block';
+}
+
+document.getElementById('viewYearly').addEventListener('click', () => {
+  viewMode = 'yearly';
+  document.getElementById('viewYearly').classList.add('active');
+  document.getElementById('viewMonthly').classList.remove('active');
+  renderSchedule();
+});
+document.getElementById('viewMonthly').addEventListener('click', () => {
+  viewMode = 'monthly';
+  document.getElementById('viewMonthly').classList.add('active');
+  document.getElementById('viewYearly').classList.remove('active');
+  renderSchedule();
 });
 </script>
 </body>
