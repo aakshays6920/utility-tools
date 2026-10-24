@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Tools – Case Converter, Word Counter & More</title>
+<meta name="description" content="Free text tools: convert to uppercase, lowercase, title case, sentence case. Word counter, character counter, and reading time estimator.">
+<meta name="keywords" content="text converter, case converter, word counter, character counter, uppercase converter, title case">
+<meta property="og:title" content="Text Tools">
+<meta property="og:description" content="Convert text cases and count words instantly.">
+<meta property="og:type" content="website">
+<style>
+:root { --primary: #dc2626; --bg: #f8fafc; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; }
+.header { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; padding: 1.5rem; text-align: center; }
+.header h1 { font-size: 1.8rem; }
+.container { max-width: 800px; margin: -1rem auto 2rem; padding: 0 1rem; }
+.card { background: white; border-radius: 16px; padding: 1.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+textarea { width: 100%; height: 160px; padding: 0.9rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; font-family: inherit; resize: vertical; }
+.buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+button { padding: 0.65rem 1rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+button.secondary { background: #64748b; }
+.stats { margin-top: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; }
+.stat { background: #fef2f2; padding: 0.8rem; border-radius: 10px; text-align: center; }
+.stat strong { display: block; font-size: 1.3rem; color: var(--primary); }
+.footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; }
+.footer a { color: var(--primary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="header"><h1>Text Tools</h1></div>
+<div class="container">
+  <div class="card">
+    <textarea id="text" placeholder="Paste or type your text here..."></textarea>
+    <div class="buttons">
+      <button onclick="convert('upper')">UPPERCASE</button>
+      <button onclick="convert('lower')">lowercase</button>
+      <button onclick="convert('title')">Title Case</button>
+      <button onclick="convert('sentence')">Sentence case</button>
+      <button onclick="convert('camel')">camelCase</button>
+      <button onclick="convert('snake')">snake_case</button>
+      <button onclick="convert('kebab')">kebab-case</button>
+      <button onclick="convert('reverse')">Reverse</button>
+      <button onclick="convert('clean')">Clean Spaces</button>
+      <button class="secondary" onclick="copyText()">Copy</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong id="words">0</strong> Words</div>
+      <div class="stat"><strong id="chars">0</strong> Characters</div>
+      <div class="stat"><strong id="charsNoSpace">0</strong> No Spaces</div>
+      <div class="stat"><strong id="sentences">0</strong> Sentences</div>
+      <div class="stat"><strong id="reading">0</strong> min read</div>
+    </div>
+  </div>
+</div>
+<div class="footer"><a href="privacy.html">Privacy Policy</a> • Free tool • No data stored</div>
+<script>
+function updateStats() {
+  const text = document.getElementById('text').value;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.length;
+  const charsNoSpace = text.replace(/\s/g,'').length;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length;
+  const reading = Math.ceil(words / 200) || 0;
+  document.getElementById('words').textContent = words;
+  document.getElementById('chars').textContent = chars;
+  document.getElementById('charsNoSpace').textContent = charsNoSpace;
+  document.getElementById('sentences').textContent = sentences;
+  document.getElementById('reading').textContent = reading;
+}
+function convert(type) {
+  const ta = document.getElementById('text');
+  let t = ta.value;
+  if (type==='upper') t = t.toUpperCase();
+  else if (type==='lower') t = t.toLowerCase();
+  else if (type==='title') t = t.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  else if (type==='sentence') t = t.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase());
+  else if (type==='camel') t = t.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m,c) => c.toUpperCase());
+  else if (type==='snake') t = t.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  else if (type==='kebab') t = t.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  else if (type==='reverse') t = t.split('').reverse().join('');
+  else if (type==='clean') t = t.replace(/\s+/g,' ').trim();
+  ta.value = t;
+  updateStats();
+}
+function copyText() {
+  navigator.clipboard.writeText(document.getElementById('text').value);
+  alert('Copied!');
+}
+document.getElementById('text').addEventListener('input', updateStats);
+</script>
+</body>
+</html>

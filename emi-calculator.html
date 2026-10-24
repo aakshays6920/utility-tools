@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMI / Loan Calculator – Free Online Loan EMI & Amortization</title>
+<meta name="description" content="Free EMI calculator. Calculate monthly loan payments, total interest, and full amortization schedule. Supports home, car, and personal loans.">
+<meta name="keywords" content="EMI calculator, loan calculator, amortization schedule, home loan EMI, personal loan calculator">
+<meta property="og:title" content="EMI / Loan Calculator">
+<meta property="og:description" content="Calculate monthly EMI, total interest, and amortization schedule instantly.">
+<meta property="og:type" content="website">
+<style>
+:root { --primary: #1a73e8; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+.header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 1.5rem; text-align: center; }
+.header h1 { font-size: 1.8rem; font-weight: 700; }
+.container { max-width: 820px; margin: -1rem auto 2rem; padding: 0 1rem; }
+.card { background: var(--card); border-radius: 16px; padding: 1.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.form-group { margin-bottom: 1rem; }
+label { display: block; margin-bottom: 0.4rem; font-weight: 600; font-size: 0.95rem; }
+input, select { width: 100%; padding: 0.85rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; transition: border 0.2s; }
+input:focus, select:focus { outline: none; border-color: var(--primary); }
+button { width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1.05rem; font-weight: 600; cursor: pointer; margin-top: 0.5rem; }
+button:hover { background: #1557b0; }
+.results { margin-top: 1.75rem; padding: 1.25rem; background: #f0f7ff; border-radius: 12px; }
+.results h2 { margin-bottom: 1rem; color: var(--primary); }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.result-box { background: white; padding: 1rem; border-radius: 10px; text-align: center; }
+.result-box strong { display: block; font-size: 1.4rem; color: var(--primary); }
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+th, td { padding: 0.6rem; text-align: right; border-bottom: 1px solid #e2e8f0; }
+th { background: #e8f0fe; text-align: center; }
+th:first-child, td:first-child { text-align: left; }
+.footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: var(--muted); }
+.footer a { color: var(--primary); text-decoration: none; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="header"><h1>EMI / Loan Calculator</h1></div>
+<div class="container">
+  <div class="card">
+    <form id="emiForm">
+      <div class="form-row">
+        <div class="form-group"><label for="principal">Loan Amount</label><input type="number" id="principal" value="500000" min="1" required></div>
+        <div class="form-group"><label for="rate">Annual Interest Rate (%)</label><input type="number" id="rate" value="8.5" step="0.1" min="0" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label for="tenure">Tenure (Years)</label><input type="number" id="tenure" value="20" min="1" required></div>
+        <div class="form-group"><label for="extra">Extra Monthly Payment (optional)</label><input type="number" id="extra" value="0" min="0"></div>
+      </div>
+      <button type="submit">Calculate EMI</button>
+    </form>
+    <div id="results" class="results" style="display:none;">
+      <h2>Results</h2>
+      <div class="result-grid">
+        <div class="result-box"><strong id="emi"></strong> Monthly EMI</div>
+        <div class="result-box"><strong id="totalInterest"></strong> Total Interest</div>
+        <div class="result-box"><strong id="totalPayment"></strong> Total Payment</div>
+        <div class="result-box"><strong id="payoff"></strong> Payoff Time</div>
+      </div>
+      <h3>Yearly Amortization Summary</h3>
+      <div style="overflow-x:auto;"><table id="schedule"><thead><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+<div class="footer"><a href="privacy.html">Privacy Policy</a> • Free educational tool • No data stored</div>
+<script>
+document.getElementById('emiForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const P = parseFloat(document.getElementById('principal').value);
+  const annualRate = parseFloat(document.getElementById('rate').value);
+  const years = parseInt(document.getElementById('tenure').value);
+  const extra = parseFloat(document.getElementById('extra').value) || 0;
+  const r = annualRate / 12 / 100;
+  const n = years * 12;
+  const baseEmi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  const emi = baseEmi + extra;
+  let balance = P, totalInterest = 0, months = 0;
+  const maxMonths = n * 2;
+  while (balance > 0.01 && months < maxMonths) {
+    const interest = balance * r;
+    let principalPaid = emi - interest;
+    if (principalPaid > balance) principalPaid = balance;
+    balance -= principalPaid;
+    totalInterest += interest;
+    months++;
+  }
+  const totalPayment = (baseEmi * months) + (extra * months);
+  const payoffYears = Math.floor(months / 12);
+  const payoffMonths = months % 12;
+  document.getElementById('emi').textContent = emi.toFixed(2);
+  document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
+  document.getElementById('totalPayment').textContent = (P + totalInterest).toFixed(2);
+  document.getElementById('payoff').textContent = payoffYears + 'y ' + payoffMonths + 'm';
+  const tbody = document.querySelector('#schedule tbody');
+  tbody.innerHTML = '';
+  balance = P;
+  for (let y = 1; y <= Math.ceil(months / 12); y++) {
+    let yearP = 0, yearI = 0;
+    for (let m = 1; m <= 12 && balance > 0; m++) {
+      const interest = balance * r;
+      let pp = emi - interest;
+      if (pp > balance) pp = balance;
+      yearI += interest; yearP += pp; balance -= pp;
+    }
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${y}</td><td>${yearP.toFixed(0)}</td><td>${yearI.toFixed(0)}</td><td>${Math.max(0,balance).toFixed(0)}</td>`;
+    tbody.appendChild(row);
+  }
+  document.getElementById('results').style.display = 'block';
+});
+</script>
+</body>
+</html>
