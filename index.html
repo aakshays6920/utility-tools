@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Utility Tools</title>
 <meta name="description" content="Precision tools for everyday calculations. EMI, unit conversion, age, text, and compound interest.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -15,6 +13,18 @@
   --muted: #86868b;
   --card: rgba(255,255,255,0.06);
   --border: rgba(255,255,255,0.12);
+  --accent: #2997ff;
+  --btn-bg: #fff;
+  --btn-text: #000;
+}
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --card: rgba(0,0,0,0.03);
+  --border: rgba(0,0,0,0.1);
+  --btn-bg: #000;
+  --btn-text: #fff;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -23,24 +33,26 @@ body {
   color: var(--text);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
 }
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   backdrop-filter: blur(20px);
-  background: rgba(0,0,0,0.6);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
   border-bottom: 1px solid var(--border);
   padding: 1rem 2rem;
   display: flex; justify-content: space-between; align-items: center;
 }
 .nav a { color: var(--text); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+.toggle { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 980px; padding: 0.4rem 0.9rem; cursor: pointer; font-size: 0.85rem; }
 .hero {
   min-height: 100vh;
   display: flex; flex-direction: column; justify-content: center; align-items: center;
   text-align: center; padding: 6rem 2rem 4rem;
-  background: radial-gradient(ellipse at center, #1a1a1a 0%, #000 70%);
+  animation: fadeUp 0.8s ease both;
 }
 .hero h1 { font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 600; letter-spacing: -0.03em; margin-bottom: 1rem; }
-.hero p { font-size: 1.25rem; color: var(--muted); max-width: 520px; font-weight: 400; }
+.hero p { font-size: 1.25rem; color: var(--muted); max-width: 520px; }
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -56,23 +68,28 @@ body {
   padding: 2rem;
   text-align: center;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  animation: fadeUp 0.6s ease both;
 }
-.card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.25); }
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
+.card:hover { transform: translateY(-6px); border-color: var(--accent); }
 .card h2 { font-size: 1.4rem; font-weight: 500; margin-bottom: 0.5rem; }
 .card p { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
 .card a {
   display: inline-block;
   padding: 0.7rem 1.6rem;
-  background: #fff;
-  color: #000;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   text-decoration: none;
   border-radius: 980px;
   font-weight: 500;
   font-size: 0.9rem;
-  transition: opacity 0.2s;
+  transition: transform 0.2s, opacity 0.2s;
 }
-.card a:hover { opacity: 0.85; }
+.card a:hover { transform: scale(1.04); }
 .footer {
   text-align: center;
   padding: 3rem 2rem;
@@ -81,11 +98,18 @@ body {
   border-top: 1px solid var(--border);
 }
 .footer a { color: var(--muted); text-decoration: none; }
-.footer a:hover { color: #fff; }
+.footer a:hover { color: var(--accent); }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
-<nav class="nav"><a href="index.html">Tools</a><a href="privacy.html">Privacy</a></nav>
+<nav class="nav">
+  <a href="index.html">Tools</a>
+  <button class="toggle" id="themeToggle">Light</button>
+</nav>
 <section class="hero">
   <h1>Precision tools.</h1>
   <p>Simple, private calculators designed with care.</p>
@@ -98,5 +122,19 @@ body {
   <div class="card"><h2>Compound Interest</h2><p>Savings growth over time</p><a href="compound-interest.html">Open</a></div>
 </div>
 <footer class="footer"><a href="privacy.html">Privacy Policy</a></footer>
+<script>
+const toggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+function setTheme(theme) {
+  root.setAttribute('data-theme', theme);
+  toggle.textContent = theme === 'light' ? 'Dark' : 'Light';
+  localStorage.setItem('theme', theme);
+}
+const saved = localStorage.getItem('theme') || 'dark';
+setTheme(saved);
+toggle.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+</script>
 </body>
 </html>
