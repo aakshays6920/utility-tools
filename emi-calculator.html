@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EMI Calculator</title>
-<meta name="description" content="Calculate monthly loan EMI, total interest, and full amortization schedule. Yearly or monthly view.">
+<meta name="description" content="Calculate monthly loan EMI, total interest, and full amortization schedule. Currency auto-detects by country.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root { --bg: #000; --text: #fff; --muted: #86868b; --card: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.12); --accent: #2997ff; --btn-bg: #fff; --btn-text: #000; }
@@ -46,16 +46,16 @@ th:first-child, td:first-child { text-align: left; }
   <div class="card">
     <form id="emiForm">
       <div class="form-row">
-        <div><label>Loan Amount (₹)</label><input type="number" id="principal" value="500000" min="1" required></div>
-        <div><label>Annual Rate (%)</label><input type="number" id="rate" value="8.5" step="0.1" min="0" required></div>
+        <div><label>Loan Amount</label><input type="number" id="principal" value="50000" min="1" required></div>
+        <div><label>Currency</label><select id="currency"><option value="USD">USD ($)</option><option value="INR">INR (₹)</option><option value="EUR">EUR (€)</option><option value="GBP">GBP (£)</option><option value="AUD">AUD (A$)</option><option value="CAD">CAD (C$)</option><option value="SGD">SGD (S$)</option><option value="AED">AED (د.إ)</option></select></div>
       </div>
       <div class="form-row">
+        <div><label>Annual Rate (%)</label><input type="number" id="rate" value="6.5" step="0.1" min="0" required></div>
         <div><label>Tenure</label><input type="number" id="tenure" value="20" min="1" required></div>
-        <div><label>Tenure Unit</label><select id="tenureUnit"><option value="years">Years</option><option value="months">Months</option></select></div>
       </div>
       <div class="form-row">
-        <div><label>Extra Monthly (₹)</label><input type="number" id="extra" value="0" min="0"></div>
-        <div></div>
+        <div><label>Tenure Unit</label><select id="tenureUnit"><option value="years">Years</option><option value="months">Months</option></select></div>
+        <div><label>Extra Monthly</label><input type="number" id="extra" value="0" min="0"></div>
       </div>
       <button type="submit">Calculate EMI</button>
     </form>
@@ -86,15 +86,54 @@ function setTheme(theme) {
 setTheme(localStorage.getItem('theme') || 'dark');
 toggle.addEventListener('click', () => setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light'));
 
+// Auto-detect currency from locale / timezone
+function detectCurrency() {
+  const lang = navigator.language || 'en-US';
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  const countryMap = {
+    'en-IN': 'INR', 'hi-IN': 'INR',
+    'en-GB': 'GBP', 'en-AU': 'AUD', 'en-CA': 'CAD',
+    'en-SG': 'SGD', 'ar-AE': 'AED', 'en-AE': 'AED',
+    'de-DE': 'EUR', 'fr-FR': 'EUR', 'es-ES': 'EUR', 'it-IT': 'EUR',
+    'Asia/Kolkata': 'INR', 'Asia/Calcutta': 'INR',
+    'Europe/London': 'GBP', 'Australia/Sydney': 'AUD',
+    'America/Toronto': 'CAD', 'Asia/Singapore': 'SGD',
+    'Asia/Dubai': 'AED', 'Europe/Berlin': 'EUR', 'Europe/Paris': 'EUR'
+  };
+  if (countryMap[lang]) return countryMap[lang];
+  if (countryMap[tz]) return countryMap[tz];
+  if (lang.startsWith('en-IN') || tz.includes('Kolkata') || tz.includes('Calcutta')) return 'INR';
+  if (lang.includes('GB') || tz.includes('London')) return 'GBP';
+  if (lang.includes('AU') || tz.includes('Australia')) return 'AUD';
+  if (lang.includes('CA') || tz.includes('Toronto')) return 'CAD';
+  if (lang.includes('SG') || tz.includes('Singapore')) return 'SGD';
+  if (lang.includes('AE') || tz.includes('Dubai')) return 'AED';
+  if (lang.includes('DE') || lang.includes('FR') || lang.includes('ES') || lang.includes('IT') || tz.includes('Europe')) return 'EUR';
+  return 'USD'; // default
+}
+
+const detected = detectCurrency();
+document.getElementById('currency').value = detected;
+
 let scheduleData = [];
 let viewMode = 'yearly';
+let currentCurrency = detected;
 
-function formatINR(num) {
-  return '₹' + Math.round(num).toLocaleString('en-IN');
+function formatCurrency(num) {
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: currentCurrency, maximumFractionDigits: 0 }).format(Math.round(num));
+  } catch {
+    return currentCurrency + ' ' + Math.round(num).toLocaleString();
+  }
 }
+
+document.getElementById('currency').addEventListener('change', () => {
+  currentCurrency = document.getElementById('currency').value;
+});
 
 document.getElementById('emiForm').addEventListener('submit', function(e) {
   e.preventDefault();
+  currentCurrency = document.getElementById('currency').value;
   const P = parseFloat(document.getElementById('principal').value);
   const annualRate = parseFloat(document.getElementById('rate').value);
   const tenureVal = parseInt(document.getElementById('tenure').value);
@@ -120,10 +159,10 @@ document.getElementById('emiForm').addEventListener('submit', function(e) {
 
   const payoffYears = Math.floor(m / 12);
   const payoffMonths = m % 12;
-  document.getElementById('emi').textContent = formatINR(emi);
-  document.getElementById('principalOut').textContent = formatINR(P);
-  document.getElementById('totalInterest').textContent = formatINR(totalInterest);
-  document.getElementById('totalPayment').textContent = formatINR(P + totalInterest);
+  document.getElementById('emi').textContent = formatCurrency(emi);
+  document.getElementById('principalOut').textContent = formatCurrency(P);
+  document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+  document.getElementById('totalPayment').textContent = formatCurrency(P + totalInterest);
   document.getElementById('payoff').textContent = payoffYears + 'y ' + payoffMonths + 'm';
 
   renderSchedule();
@@ -142,7 +181,7 @@ function renderSchedule() {
       yi += row.interest;
       if ((i + 1) % 12 === 0 || i === scheduleData.length - 1) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${year}</td><td>${formatINR(yp)}</td><td>${formatINR(yi)}</td><td>${formatINR(row.balance)}</td>`;
+        tr.innerHTML = `<td>${year}</td><td>${formatCurrency(yp)}</td><td>${formatCurrency(yi)}</td><td>${formatCurrency(row.balance)}</td>`;
         tbody.appendChild(tr);
         year++; yp = 0; yi = 0;
       }
@@ -151,7 +190,7 @@ function renderSchedule() {
     head.innerHTML = '<tr><th>Month</th><th>Principal</th><th>Interest</th><th>Balance</th></tr>';
     scheduleData.slice(0, 120).forEach(row => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${row.month}</td><td>${formatINR(row.principal)}</td><td>${formatINR(row.interest)}</td><td>${formatINR(row.balance)}</td>`;
+      tr.innerHTML = `<td>${row.month}</td><td>${formatCurrency(row.principal)}</td><td>${formatCurrency(row.interest)}</td><td>${formatCurrency(row.balance)}</td>`;
       tbody.appendChild(tr);
     });
     if (scheduleData.length > 120) {
