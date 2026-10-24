@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Converter – Free Online Conversion Tool</title>
+<meta name="description" content="Free unit converter for pressure, length, temperature, weight, area, and speed. Instant conversions with clean interface.">
+<meta name="keywords" content="unit converter, pressure converter, temperature converter, length converter, weight converter">
+<meta property="og:title" content="Unit Converter">
+<meta property="og:description" content="Convert pressure, length, temperature, weight and more instantly.">
+<meta property="og:type" content="website">
+<style>
+:root { --primary: #0d9488; --bg: #f8fafc; --card: #ffffff; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: #1e293b; }
+.header { background: linear-gradient(135deg, #0d9488, #0f766e); color: white; padding: 1.5rem; text-align: center; }
+.header h1 { font-size: 1.8rem; }
+.container { max-width: 720px; margin: -1rem auto 2rem; padding: 0 1rem; }
+.card { background: var(--card); border-radius: 16px; padding: 1.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+.tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.tab { padding: 0.6rem 1rem; background: #e2e8f0; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem; }
+.tab.active { background: var(--primary); color: white; }
+.form-group { margin-bottom: 1rem; }
+label { display: block; margin-bottom: 0.4rem; font-weight: 600; }
+input, select { width: 100%; padding: 0.85rem; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 1rem; }
+.swap { text-align: center; margin: 0.5rem 0; }
+.swap button { width: auto; padding: 0.5rem 1.5rem; background: #64748b; }
+.result { margin-top: 1.25rem; padding: 1.25rem; background: #f0fdfa; border-radius: 12px; font-size: 1.25rem; text-align: center; font-weight: 600; color: var(--primary); }
+.footer { text-align: center; padding: 1.5rem; font-size: 0.85rem; color: #64748b; }
+.footer a { color: var(--primary); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="header"><h1>Unit Converter</h1></div>
+<div class="container">
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-type="pressure">Pressure</button>
+      <button class="tab" data-type="length">Length</button>
+      <button class="tab" data-type="temperature">Temperature</button>
+      <button class="tab" data-type="weight">Weight</button>
+      <button class="tab" data-type="area">Area</button>
+      <button class="tab" data-type="speed">Speed</button>
+    </div>
+    <div class="form-group"><label for="value">Value</label><input type="number" id="value" value="1" step="any"></div>
+    <div class="form-group"><label for="from">From</label><select id="from"></select></div>
+    <div class="swap"><button type="button" id="swapBtn">⇕ Swap</button></div>
+    <div class="form-group"><label for="to">To</label><select id="to"></select></div>
+    <div class="result" id="result">Enter a value</div>
+  </div>
+</div>
+<div class="footer"><a href="privacy.html">Privacy Policy</a> • Free utility • No data stored</div>
+<script>
+const units = {
+  pressure: { psi:1, bar:0.0689476, kPa:6.89476, MPa:0.00689476, atm:0.068046, mmHg:51.7149 },
+  length: { m:1, cm:100, mm:1000, km:0.001, in:39.3701, ft:3.28084, mi:0.000621371, yd:1.09361 },
+  temperature: { C:'C', F:'F', K:'K' },
+  weight: { kg:1, g:1000, lb:2.20462, oz:35.274, ton:0.001 },
+  area: { m2:1, cm2:10000, km2:0.000001, ft2:10.7639, acre:0.000247105, hectare:0.0001 },
+  speed: { mps:1, kmh:3.6, mph:2.23694, knot:1.94384, fps:3.28084 }
+};
+let currentType = 'pressure';
+function populate() {
+  const from = document.getElementById('from'), to = document.getElementById('to');
+  from.innerHTML = ''; to.innerHTML = '';
+  Object.keys(units[currentType]).forEach(u => {
+    from.innerHTML += `<option>${u}</option>`;
+    to.innerHTML += `<option>${u}</option>`;
+  });
+  if (currentType==='pressure'){from.value='psi';to.value='bar';}
+  else if(currentType==='length'){from.value='m';to.value='ft';}
+  else if(currentType==='temperature'){from.value='C';to.value='F';}
+  else if(currentType==='weight'){from.value='kg';to.value='lb';}
+  else if(currentType==='area'){from.value='m2';to.value='ft2';}
+  else {from.value='kmh';to.value='mph';}
+}
+function convert() {
+  const val = parseFloat(document.getElementById('value').value)||0;
+  const fromU = document.getElementById('from').value;
+  const toU = document.getElementById('to').value;
+  let result;
+  if (currentType==='temperature') {
+    let c = fromU==='C'?val:fromU==='F'?(val-32)*5/9:val-273.15;
+    result = toU==='C'?c:toU==='F'?c*9/5+32:c+273.15;
+  } else {
+    result = (val / units[currentType][fromU]) * units[currentType][toU];
+  }
+  document.getElementById('result').textContent = `${val} ${fromU} = ${result.toFixed(4)} ${toU}`;
+}
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  currentType = tab.dataset.type;
+  populate(); convert();
+}));
+document.getElementById('swapBtn').addEventListener('click', () => {
+  const f = document.getElementById('from').value;
+  document.getElementById('from').value = document.getElementById('to').value;
+  document.getElementById('to').value = f;
+  convert();
+});
+['value','from','to'].forEach(id => document.getElementById(id).addEventListener('input', convert));
+populate(); convert();
+</script>
+</body>
+</html>
